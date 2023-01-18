@@ -15,11 +15,6 @@
 <p align="center">
 	<a href="https://capitec.github.io/open-source/?repo=omni-state"><img alt="Docs" src="https://img.shields.io/static/v1?label=docs&message=capitec.github.io/open-source&color=blue&style=flat-square" /></a>
 </p>
-<!--
-<p align="center">
-	<a href="https://twitter.com/capitecbank"><img src="https://img.shields.io/twitter/follow/capitecbank" /></a>
-</p>
--->
 
 <br/>
 
@@ -32,21 +27,20 @@
 	[<a href="#license">License</a>]
 </p>
 
-<br/>
+<br>
 
 ---
+
+<br>
 
 ## Introduction
 
 Omni State is a collection of utilities that makes it simple to manage the local state and data storage in web applications. The library is lightweight and comes with zero dependencies, minimizing bloat to your project.
 
 Core features of the library include:
-- **Web Components** - The router has been specifically built to route pages built using web components.
-- **Lazy Loading** - Web component pages can be lazy loaded using ```import('...')```.
-- **Route Guards** - Routes can be protected using guard functions that prevent routing based on your app logic, e.g. check if the user is logged in.
-- **Animations** - Pages can be animated in and out of view when routing, e.g. fade, slide, pop, etc.
-- **Browser History** - Integrates with the browser history API to push, pop, and replace paths.
-- **Mobile Friendly** - Navigating back reverses the route load animation, allowing mobile-like user experiences e.g. sliding routes in and out.
+- **TODO** - TODO.
+- **TODO** - TODO.
+- **TODO** - TODO.
 
 Features:
 - Observable property
@@ -55,6 +49,8 @@ Features:
 - Async storage support
 - Support strongly typed runtime data models
 - Immutable state, edit draft before persisting
+
+<br>
 
 ## Usage
 
@@ -79,7 +75,7 @@ class AppState {
     @state({ storage: localStorage, key: 'CapacitorStorage.userSession' })
     userSession;
 
-    // State decorator on standard object, targetting an asynchronous store.
+    // State decorator on standard object, targeting an asynchronous store.
     @state({ storage: LocalStorage, key: 'userSession', encoder: null })
     userSession;
 
@@ -87,7 +83,7 @@ class AppState {
     @state({ storage: localStorage, key: 'CapacitorStorage.userSession' })
     userSession = new ObservableProperty({ model: UserSession });
 
-    // State decorator on an observable property, targetting an asynchronous store.
+    // State decorator on an observable property, targeting an asynchronous store.
     @state({
 		storage: LocalStorage,
 		key: 'userSession',
@@ -102,7 +98,7 @@ class AppState {
 		model: UserSession
 	});
 
-    // Stateful property, targetting an asynchronous store.
+    // Stateful property, targeting an asynchronous store.
     userSession = new StatefulProperty({
 		storage: LocalStorage,
 		key: 'userSession',
@@ -150,6 +146,9 @@ class App {
     }
 }
 ```
+
+<br>
+
 ## Examples
 
 Starter projects are available in the [examples directory](./examples) for the following decorator standards:
@@ -183,6 +182,8 @@ Starter projects are available in the [examples directory](./examples) for the f
 		</tbody>
 	</table>
 </div>
+
+<br>
 
 ## API Reference
 
@@ -234,6 +235,8 @@ todo
 
 todo
 
+<br>
+
 ## Contributors
 
 Made possible by these fantastic people. 💖
@@ -246,7 +249,7 @@ See the [`CONTRIBUTING.md`](./CONTRIBUTING.md) guide to get involved.
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jn42lm1"><img src="https://avatars2.githubusercontent.com/u/54233338?v=4?s=100" width="100px;" alt="jn42lm1"/><br /><sub><b>jn42lm1</b></sub></a><br /><a href="https://github.com/capitec/omni-router/commits?author=jn42lm1" title="Code">💻</a> <a href="https://github.com/capitec/omni-router/commits?author=jn42lm1" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jn42lm1"><img src="https://avatars2.githubusercontent.com/u/54233338?v=4?s=100" width="100px;" alt="jn42lm1"/><br /><sub><b>jn42lm1</b></sub></a><br /><a href="https://github.com/capitec/omni-state/commits?author=jn42lm1" title="Code">💻</a> <a href="https://github.com/capitec/omni-state/commits?author=jn42lm1" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>
@@ -256,6 +259,28 @@ See the [`CONTRIBUTING.md`](./CONTRIBUTING.md) guide to get involved.
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
+<br>
+
 ## License
 
 Licensed under [MIT](LICENSE)
+
+<br>
+<br>
+<hr>
+<br>
+<br>
+<br>
+<p align="center">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="./docs/logos/capitec-logo-white.svg">
+        <img alt="Capitec Logo" src="./docs/logos/capitec-logo-color.svg" height="28">
+    </picture>
+</p>
+<p align="center">We are hiring 🤝 Join us! 🇿🇦</p>
+<p align="center">
+    <a href="https://www.capitecbank.co.za/about-us/careers">https://www.capitecbank.co.za/about-us/careers</a>
+</p>
+
+<br>
+<br>
