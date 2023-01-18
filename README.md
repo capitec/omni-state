@@ -26,7 +26,7 @@
 <p align="center">
 	[<a href="#introduction">Introduction</a>]
 	[<a href="#usage">Usage</a>]
-	[<a href="#example-projects">Example Projects</a>]
+	[<a href="#examples">Examples</a>]
 	[<a href="#api-reference">API Reference</a>]
 	[<a href="#contributors">Contributors</a>]
 	[<a href="#license">License</a>]
@@ -150,7 +150,7 @@ class App {
     }
 }
 ```
-## Example Projects
+## Examples
 
 Starter projects are available in the [examples directory](./examples) for the following decorator standards:
 

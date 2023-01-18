@@ -284,6 +284,11 @@ function state({ storage, key, encoder } = {}) {
 	};
 }
 
+// Polyfill Promise.allSettled if if does not exist in the browser.
+Promise.allSettled = Promise.allSettled || ((promises) => Promise.all(promises.map(p => p
+	.then(value => ({ status: 'fulfilled', value: value }))
+	.catch(reason => ({ status: 'rejected', reason: reason })))));
+
 // Attach an 'all settled' property to the decorator that can be awaited to guarantee that all
 // decorated properties have been initialized from storage. Required to enable async data stores.
 Object.defineProperty(state, 'allSettled', {
