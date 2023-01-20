@@ -163,19 +163,20 @@ function state({ storage, key, encoder } = {}) {
 		// Initialize the default property value.
 		let propertyValue = protoOrDescriptor.initializer ? protoOrDescriptor.initializer() : undefined;
 
-		// Restore the property value from storage, if no initializer was provided and a value is available in storage.
-		if (!isDefined(propertyValue) || (isObservable(propertyValue) && !propertyValue.exists())) { // eslint-disable-line no-extra-parens
+		// Patch the property to sync from and to storage when it's value changes.
+		const storageValue = storage.getItem(key);
 
-			const storageValue = storage.getItem(key);
+		if (isPromise(storageValue)) {
 
-			if (isDefined(storageValue)) {
+			// When the storage system is async, complete the patching operation as an async task.
+			_pendingPromises[key] = Promise.resolve(storageValue).then((value) => {
 
-				// If the storage is async, then queue the value to be read, otherwise just set the storage value as the property's initial value.
-				if (isPromise(storageValue)) {
+				// Restore the property value from storage, if no initializer was provided and a value is available in storage.
+				if (!isDefined(propertyValue) || (isObservable(propertyValue) && !propertyValue.exists())) { // eslint-disable-line no-extra-parens
 
-					_pendingPromises[key] = Promise.resolve(storageValue).then((value) => {
+					if (isDefined(storageValue)) {
 
-						// Parse the value set in storage using the set decoder.
+						// Parse the value set in storage using the provided encoder.
 						let decodedValue = value;
 
 						if (encoder) {
@@ -188,42 +189,55 @@ function state({ storage, key, encoder } = {}) {
 						} else {
 							propertyValue = decodedValue;
 						}
+					}
+				}
 
-						// Clean up, by removing the operation from read the queue.
-						delete _pendingPromises[key];
+				// Patch the property to save value changes into storage.
+				if (isObservable(propertyValue)) {
 
-						return decodedValue;
-					});
+					// If the property is a ObservableProperty type, then patch the ObservableProperty.set function to store the property value when the set function is called.
+					patchObservablePropertySet(storage, key, propertyValue, encoder);
 
 				} else {
 
-					// Parse the value set in storage using the set decoder.
-					let decodedValue = storageValue;
-
-					if (encoder) {
-						decodedValue = encoder.parse(storageValue);
-					}
-
-					// Set the decoded storage value as the initial property value.
-					if (isObservable(propertyValue)) {
-						propertyValue.set(decodedValue);
-					} else {
-						propertyValue = decodedValue;
-					}
+					// If the property is any other type, then just set the property value in storage directly.
+					storeValue(storage, key, propertyValue, encoder);
 				}
-			}
-		}
 
-		// Patch the property to save value changes into storage.
-		if (isObservable(propertyValue)) {
+				// Clean up, by removing the async operation from read the queue.
+				delete _pendingPromises[key];
 
-			// If the property is a ObservableProperty type, then patch the ObservableProperty.set function to store the property value when the set function is called.
-			patchObservablePropertySet(storage, key, propertyValue, encoder);
+				// Return the initialized property value.
+				return propertyValue;
+			});
 
 		} else {
 
-			// If the property is any other type, then just set the property value in storage directly.
-			storeValue(storage, key, propertyValue, encoder);
+			// Parse the value set in storage using the provided encoder.
+			let decodedValue = storageValue;
+
+			if (encoder) {
+				decodedValue = encoder.parse(storageValue);
+			}
+
+			// Set the decoded storage value as the initial property value.
+			if (isObservable(propertyValue)) {
+				propertyValue.set(decodedValue);
+			} else {
+				propertyValue = decodedValue;
+			}
+
+			// Patch the property to save value changes into storage.
+			if (isObservable(propertyValue)) {
+
+				// If the property is a ObservableProperty type, then patch the ObservableProperty.set function to store the property value when the set function is called.
+				patchObservablePropertySet(storage, key, propertyValue, encoder);
+
+			} else {
+
+				// If the property is any other type, then just set the property value in storage directly.
+				storeValue(storage, key, propertyValue, encoder);
+			}
 		}
 
 		// Create the new property descriptor template that patches state behavior onto the property.
