@@ -1,6 +1,6 @@
 {
 	"name": "@capitec/omni-state",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"description": "Simple patterns to manage your web app state and storage",
 	"author": "Capitec",
 	"license": "MIT",
@@ -13,7 +13,7 @@
 		"url": "https://github.com/capitec/omni-state/issues"
 	},
 	"type": "module",
-	"main": "src/index.js",
+	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"engines": {
 		"node": ">=16.x"
@@ -42,20 +42,18 @@
 	},
 	"keywords": [
 		"app state",
-		"state management",
-		"observable",
-		"decorators"
+		"state management"
 	],
 	"devDependencies": {
-		"@typescript-eslint/eslint-plugin": "^5.23.0",
-		"@typescript-eslint/parser": "^5.23.0",
-		"all-contributors-cli": "^6.20.0",
+		"@typescript-eslint/eslint-plugin": "^5.59.7",
+		"@typescript-eslint/parser": "^5.59.7",
+		"all-contributors-cli": "^6.25.1",
 		"copyfiles": "^2.4.1",
 		"command-line-args": "^5.2.1",
-		"eslint": "^8.15.0",
+		"eslint": "^8.41.0",
 		"eslint-plugin-tsdoc": "^0.2.16",
 		"package-json": "^8.1.0",
-		"typedoc": "^0.22.15",
-		"typescript": "^4.6.4"
+		"typedoc": "^0.24.7",
+		"typescript": "^5.0.4"
 	}
 }

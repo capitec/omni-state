@@ -1,32 +1,20 @@
-import { ModelBase } from './ModelBase';
-import { ObservableProperty } from './ObservableProperty';
-import { isDefined } from './utilities/isDefined';
-import { isFunction } from './utilities/isFunction';
-import { isPromise } from './utilities/isPromise';
-import { storeValue } from './utilities/storeValue';
+import { ModelBase } from './ModelBase.js';
+import { ObservableProperty } from './ObservableProperty.js';
+import { PropertySetHandler } from './types.js';
+import { isDefined } from './utilities/isDefined.js';
+import { isFunction } from './utilities/isFunction.js';
+import { isPromise } from './utilities/isPromise.js';
+import { storeValue } from './utilities/storeValue.js';
 
 /**
  * List of asynchronous storage read operations that are running.
  */
-const _pendingPromises = {};
+const _pendingPromises = new Map<string, Promise<string | void | null>>();
 
 /**
  * Property wrapper that can be observed for changes.
- * 
- * @template T
  */
-class StatefulProperty extends ObservableProperty {
-
-	/**
-	 * The function to call whenever a property value is set, allowing for modification of the current
-	 * property value instead of overriding it completely.
-	 * 
-	 * @callback PropertySetHandler
-	 * 
-	 * @param {T} value - The current property value.
-	 * 
-	 * @returns {void}
-	 */
+export class StatefulProperty<T> extends ObservableProperty<T> {
 
 	// ----------
 	// PROPERTIES
@@ -34,24 +22,18 @@ class StatefulProperty extends ObservableProperty {
 
 	/**
 	 * The storage mechanism to save the value in.
-	 * 
-	 * @type {Storage}
 	 */
-	#storage;
+	private _storage: Storage;
 
 	/**
 	 * The key to save the value under.
-	 * 
-	 * @type {Storage}
 	 */
-	#key;
+	private _key: string
 
 	/**
-	 * The string encoding function to apply to property values before saving it in storage.
-	 * 
-	 * @type {Storage}
+	 * JSON-like string encoding interface (i.e. parse, stringify) to apply to property values when saving to and reading from storage.
 	 */
-	#encoder;
+	private _encoder: JSON;
 
 	// ------------
 	// CONSTRUCTORS
@@ -60,16 +42,12 @@ class StatefulProperty extends ObservableProperty {
 	/**
 	 * Initializes the property.
 	 * 
-	 * @param {object} args - The property arguments.
-	 * @param {Storage} args.storage - The storage mechanism to save the value in.
-	 * @param {string} args.key - The key to save the value under.
-	 * @param {JSON} [args.encoder] - Optional, a JSON-like string encoding interface (i.e. parse, stringify) to apply to property values when saving to and reading from storage. Defaults to JSON.
-	 * @param {ModelBase} [args.model] - Optional, model type to parse the property value to. Allows for strongly typed runtime models.
+	 * @param args - The property arguments.
 	 */
-	constructor({ storage, key, encoder = JSON, model } = {}) {
+	constructor({ storage, key, encoder, model }: { storage: Storage, key: string, encoder: JSON, model?: typeof ModelBase }) {
 
 		super({ model });
-
+		
 		// Validate the property parameters.
 		if (!storage) {
 			throw new Error(`StatefulProperty - "${key}" requires a "storage" mechanism to be specified, e.g. localStorage, sessionStorage, or a similar interface.`);
@@ -79,21 +57,21 @@ class StatefulProperty extends ObservableProperty {
 			throw new Error(`StatefulProperty - "${key}" requires a "key" to be specified, e.g. "my-property-name".`);
 		}
 
-		if (encoder && !isFunction(encoder.parse)) {
+		if (encoder && !isFunction(encoder.parse)) { // eslint-disable-line @typescript-eslint/unbound-method
 			throw new Error(`StatefulProperty - "${key}" requires a "parse" function on the specified "encoder".`);
 		}
 
-		if (encoder && !isFunction(encoder.stringify)) {
+		if (encoder && !isFunction(encoder.stringify)) { // eslint-disable-line @typescript-eslint/unbound-method
 			throw new Error(`StatefulProperty - "${key}" requires a "stringify" function on the specified "encoder".`);
 		}
 
 		// Set default property values.
-		this.#storage = storage;
-		this.#key = key;
-		this.#encoder = encoder;
+		this._storage = storage;
+		this._key = key;
+		this._encoder = encoder || JSON;
 
 		// Restore the property value from storage.
-		this.#initFromStorage();
+		this._initFromStorage();
 	}
 
 	// ----------------
@@ -101,25 +79,27 @@ class StatefulProperty extends ObservableProperty {
 	// ----------------
 
 	/**
-	 * Property that can be awaited to guarantee that all ```StatefulProperty```'s have been initialized from storage. Required to enable async data stores.
+	 * Property that can be awaited to guarantee that all `StatefulProperty`'s have been initialized from storage. Required to enable async data stores.
 	 * 
-	 * @type {Promise<any>}
+	 * @returns Nothing.
 	 */
-	static get allSettled() {
+	static get allSettled(): Promise<Map<string, any>> {
 
 		return new Promise((resolve, reject) => {
 
 			const keys = Object.keys(_pendingPromises);
 
 			// Wait for all of the pending storage read operations to finalize.
-			Promise.allSettled(Object.values(_pendingPromises)).then(outcome => {
+			void Promise.allSettled(_pendingPromises.values()).then(outcome => {
 
 				// Report the value of each storage property read.
-				const result = {};
+				const result = new Map<string, any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
 
 				for (let i = 0; i < outcome.length; i++) {
 
-					result[keys[i]] = outcome[i].value;
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore
+					result.set(keys[i], outcome[i].value);
 				}
 
 				resolve(result);
@@ -138,11 +118,11 @@ class StatefulProperty extends ObservableProperty {
 	 *   1) a direct value matching the property model, or
 	 *   2) a function that will be called with a template of the current property value, that may be modified and will replace the property value when complete
 	 * 
-	 * @param {T|PropertySetHandler} valueOrFunction - The value to set, or the function to call.
+	 * @param valueOrFunction - The value to set, or the function to call.
 	 * 
-	 * @returns {void}
+	 * @returns Nothing.
 	 */
-	set(valueOrFunction) {
+	override set(valueOrFunction: T | PropertySetHandler | undefined): void {
 
 		// Set the new property value.
 		super.set(valueOrFunction);
@@ -156,7 +136,7 @@ class StatefulProperty extends ObservableProperty {
 		}
 
 		// Save the new property value in storage.
-		storeValue(this.#storage, this.#key, newValue, this.#encoder);
+		storeValue(this._storage, this._key, newValue, this._encoder);
 	}
 
 	// -----------------
@@ -165,54 +145,47 @@ class StatefulProperty extends ObservableProperty {
 
 	/**
 	 * Initializes the property value from storage, if available.
-	 * 
-	 * @returns {void}
 	 */
-	#initFromStorage() {
+	_initFromStorage(): void {
 
 		// Read the property value from storage.
-		const storageValue = this.#storage.getItem(this.#key);
+		const storageValue = this._storage.getItem(this._key);
 
 		if (isDefined(storageValue)) {
 
 			// If the storage is async, then queue the value to be read, otherwise just set the storage value as the property's initial value.
 			if (isPromise(storageValue)) {
 
-				_pendingPromises[this.#key] = Promise.resolve(storageValue).then((value) => {
+				_pendingPromises.set(this._key, Promise.resolve(storageValue).then((value) => {
 
 					// Parse the value set in storage using the set decoder.
 					let decodedValue = value;
 
-					if (this.#encoder) {
-						decodedValue = this.#encoder.parse(value);
+					if (this._encoder && value) {
+						decodedValue = this._encoder.parse(value); // eslint-disable-line @typescript-eslint/no-unsafe-assignment
 					}
 
 					// Set the decoded storage value as the initial property value.
-					super.set(decodedValue);
+					super.set(decodedValue as T || undefined);
 
 					// Clean up, by removing the operation from read the queue.
-					delete _pendingPromises[this.#key];
+					_pendingPromises.delete(this._key);
 
 					return decodedValue;
-				});
+				}));
 
 			} else {
 
 				// Parse the value set in storage using the set decoder.
 				let decodedValue = storageValue;
 
-				if (this.#encoder) {
-					decodedValue = this.#encoder.parse(storageValue);
+				if (this._encoder && storageValue) {
+					decodedValue = this._encoder.parse(storageValue); // eslint-disable-line @typescript-eslint/no-unsafe-assignment
 				}
 
 				// Set the decoded storage value as the initial property value.
-				super.set(decodedValue);
+				super.set(decodedValue as T || undefined);
 			}
 		}
 	}
 }
-
-export {
-	StatefulProperty as default,
-	StatefulProperty
-};
