@@ -1,3 +1,6 @@
+import { AsyncStorage } from '../types/AsyncStorage';
+import { SyncStorage } from '../types/SyncStorage';
+
 /**
  * Saves a value in storage, or remove it from storage if not set.
  * 
@@ -8,20 +11,14 @@
  * 
  * @returns Nothing.
  */
-export function storeValue(storage: Storage, key: string, value?: any, encoder?: JSON): void { // eslint-disable-line @typescript-eslint/no-explicit-any
+export function storeValue(storage: SyncStorage | AsyncStorage, key: string, value?: any): void { // eslint-disable-line @typescript-eslint/no-explicit-any
 
 	// Remove the value from storage if it is not set.
 	if (value === undefined || value === null) {
-		return storage.removeItem(key);
-	}
-
-	// Encode the property value with the provided encoder.
-	let encodedValue = value; // eslint-disable-line @typescript-eslint/no-unsafe-assignment
-
-	if (encoder) {
-		encodedValue = encoder.stringify(value);
+		void storage.remove(key);
+		return;
 	}
 
 	// Save the new value to storage.
-	storage.setItem(key, encodedValue); // eslint-disable-line @typescript-eslint/no-unsafe-argument
+	void storage.set(key, value);
 }

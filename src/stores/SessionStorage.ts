@@ -1,7 +1,9 @@
+import { SyncStorage } from '../types/SyncStorage';
+
 /**
- * Interface to persist values to an asynchronous storage mechanism.
+ * Storage class that allows for persisting data as JSON values for the duration of a browser session.
  */
-export interface AsyncStorage {
+class SessionStorageImpl implements SyncStorage {
 
 	/**
 	 * Gets a value from storage for the given key.
@@ -10,7 +12,23 @@ export interface AsyncStorage {
 	 * 
 	 * @returns The stored value parsed from JSON, or null if not set.
 	 */
-	get<T>(key: string): Promise<T | undefined>;
+	get<T>(key: string): T | undefined {
+
+		try {
+
+			const result = window.sessionStorage.getItem(key);
+
+			if (!result) {
+				return undefined;
+			}
+
+			return JSON.parse(result) as T;
+
+		} catch (err) {
+
+			return undefined;
+		}
+	}
 
 	/** 
 	 * Sets a value in storage for the given key.
@@ -20,7 +38,10 @@ export interface AsyncStorage {
 	 * 
 	 * @returns Nothing.
 	 */
-	set(key: string, value: unknown): Promise<void>;
+	set(key: string, value: unknown): void {
+
+		window.sessionStorage.setItem(key, JSON.stringify(value));
+	}
 
 	/**
 	 * Removes a value from storage for the given key.
@@ -29,14 +50,20 @@ export interface AsyncStorage {
 	 * 
 	 * @returns Nothing.
 	 */
-	remove(key: string): Promise<void>;
+	remove(key: string): void {
+
+		window.sessionStorage.removeItem(key);
+	}
 
 	/**
 	 * Removes all values from storage.
 	 * 
 	 * @returns Nothing.
 	 */
-	clear(): Promise<void>;
+	clear(): void {
+
+		window.sessionStorage.clear();
+	}
 
 	/**
 	 * Get the name of the key at a given index.
@@ -45,19 +72,30 @@ export interface AsyncStorage {
 	 * 
 	 * @returns The name of the key at the index.
 	 */
-	key(index: number): Promise<string | undefined>;
+	key(index: number): string | undefined {
+
+		return window.sessionStorage.key(index) || undefined;
+	}
 
 	/**
 	 * Finds a list of all keys in storage.
 	 * 
 	 * @returns The list of keys in storage.
 	 */
-	keys(): Promise<string[]>;
+	keys(): string[] {
+
+		return Object.keys(window.sessionStorage);
+	}
 
 	/**
 	 * Get the number of items in storage.
 	 * 
 	 * @returns The storage item count.
 	 */
-	size(): Promise<number>;
+	size(): number {
+
+		return window.sessionStorage.length;
+	}
 }
+
+export const SessionStorage = new SessionStorageImpl();

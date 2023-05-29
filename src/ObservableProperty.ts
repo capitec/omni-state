@@ -1,9 +1,8 @@
 import type { PropertyChangeHandler, PropertySetHandler } from './types';
 
-import { ModelBase } from './ModelBase.js';
 import { isDefined } from './utilities/isDefined.js';
 import { isFunction } from './utilities/isFunction.js';
-import { parseToModel } from './utilities/parseToModel.js';
+import { deepCopy } from './utilities/deepCopy';
 
 /**
  * Property wrapper that can be observed for changes.
@@ -11,19 +10,14 @@ import { parseToModel } from './utilities/parseToModel.js';
 export class ObservableProperty<T> {
 
 	/**
-	 * The model type to parse the property value to. Allows for strongly typed runtime models.
-	 */
-	private _model: typeof ModelBase | undefined;
-
-	/**
 	 * The property value that is being observed.
 	 */
-	private _value: T | undefined;
+	private _value!: T;
 
 	/**
 	 * The list of subscribers who are observing the property.
 	 */
-	private _subscribers: PropertyChangeHandler[];
+	private _subscribers: PropertyChangeHandler<T>[];
 
 	// ----------
 	// PROPERTIES
@@ -40,14 +34,12 @@ export class ObservableProperty<T> {
 	 * 
 	 * @param args - The property arguments.
 	 */
-	constructor({ model }: { model?: typeof ModelBase}) {
+	constructor() {
 
 		// Validate the property parameters.
 		// n/a
 
 		// Set default property values.
-		this._model = model;
-		this._value = undefined;
 		this._subscribers = [];
 	}
 
@@ -74,13 +66,9 @@ export class ObservableProperty<T> {
 	 * 
 	 * @returns The stored value.
 	 */
-	get(): T | undefined {
+	get(): T {
 
-		if (this._value === undefined) {
-			return undefined;
-		}
-
-		return parseToModel<T>(this._value, this._model);
+		return this._value;
 	}
 
 	/**
@@ -94,36 +82,34 @@ export class ObservableProperty<T> {
 	 * 
 	 * @returns Nothing.
 	 */
-	set(valueOrFunction: T | PropertySetHandler | undefined): void {
+	set(valueOrFunction: T | PropertySetHandler<T>): void {
 
 		// Update the property value.
 		if (valueOrFunction === undefined) {
 
 			// If the new value is undefined, then unset the property value.
-			this._value = undefined;
+			this._value = valueOrFunction;
 
 		} else if (isFunction(valueOrFunction)) {
 
 			// If the property value is a function, then call it with a the current property value to allow the property values to be modified directly.
-			const draft = this._value;
-
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
-			valueOrFunction(draft);
+			valueOrFunction(this._value); // ?? {} as T);
 
-			this._value = parseToModel(draft, this._model);
+			this._value = deepCopy(this._value) as T;
 
 		} else {
 
 			// Otherwise, just set the property value, making a copy to prevent mutation of the property value by reference.
-			this._value = parseToModel(valueOrFunction, this._model);
+			this._value = deepCopy(valueOrFunction) as T;
 		}
 
 		// Notify subscribers that the property value has changed.
 		for (const subscriber of this._subscribers) {
 
 			// Emit a frozen value to prevent mutation of the property value by reference.
-			subscriber(parseToModel(this._value, this._model));
+			subscriber(deepCopy(valueOrFunction) as T);
 		}
 	}
 
@@ -134,7 +120,7 @@ export class ObservableProperty<T> {
 	 * 
 	 * @returns Nothing.
 	 */
-	subscribe(handler: PropertyChangeHandler): void {
+	subscribe(handler: PropertyChangeHandler<T>): void {
 
 		this._subscribers.push(handler);
 	}
@@ -146,7 +132,7 @@ export class ObservableProperty<T> {
 	 * 
 	 * @returns Nothing.
 	 */
-	unsubscribe(handler: PropertyChangeHandler): void {
+	unsubscribe(handler: PropertyChangeHandler<T>): void {
 
 		this._subscribers = this._subscribers.filter(subscriber => subscriber !== handler);
 	}
