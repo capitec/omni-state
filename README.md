@@ -219,10 +219,6 @@ todo
 
 todo
 
-### utilities/isObservable
-
-todo
-
 ### utilities/isPromise
 
 todo

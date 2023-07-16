@@ -1,5 +1,5 @@
 // Decorators
-// export { state } from './decorators/state.js';
+export { stateExperimental } from './decorators/stateExperimental.js';
 
 // Stores
 export type { LocalStorage } from './stores/LocalStorage.js';
@@ -14,11 +14,10 @@ export { deepCopy } from './utilities/deepCopy.js';
 export { deepFreeze } from './utilities/deepFreeze.js';
 export { isDefined } from './utilities/isDefined.js';
 export { isFunction } from './utilities/isFunction.js';
-export { isObservable } from './utilities/isObservable.js';
 export { isPromise } from './utilities/isPromise.js';
 export { storeValue } from './utilities/storeValue.js';
 
 // Module
-export { ModelBase } from './ModelBase.js';
 export { ObservableProperty } from './ObservableProperty.js';
 export { StatefulProperty } from './StatefulProperty.js';
+export { StateManager } from './StateManager.js';

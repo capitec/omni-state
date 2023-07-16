@@ -94,8 +94,8 @@ export class ObservableProperty<T> {
 
 			// If the property value is a function, then call it with a the current property value to allow the property values to be modified directly.
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			valueOrFunction(this._value); // ?? {} as T);
+			// @ts-ignore -> needed as typescript does not pick up here the value is a callable function.
+			valueOrFunction(this._value ?? {} as T);
 
 			this._value = deepCopy(this._value) as T;
 

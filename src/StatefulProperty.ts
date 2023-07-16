@@ -1,14 +1,10 @@
 import { ObservableProperty } from './ObservableProperty.js';
+import { StateManager } from './StateManager.js';
 import { PropertySetHandler } from './types.js';
 import { AsyncStorage } from './types/AsyncStorage.js';
 import { SyncStorage } from './types/SyncStorage.js';
 import { isDefined } from './utilities/isDefined.js';
 import { isPromise } from './utilities/isPromise.js';
-
-/**
- * List of asynchronous storage read operations that are running.
- */
-const _pendingPromises = new Map<string, Promise<unknown>>();
 
 /**
  * Property wrapper that can be observed for changes.
@@ -41,7 +37,7 @@ export class StatefulProperty<T> extends ObservableProperty<T> {
 	constructor({ storage, key }: { storage: SyncStorage | AsyncStorage, key: string }) {
 
 		super();
-		
+
 		// Validate the property parameters.
 		if (!storage) {
 			throw new Error(`StatefulProperty - "${key}" requires a "storage" mechanism to be specified, e.g. LocalStorage, SessionStorage, or a similar interface.`);
@@ -57,39 +53,6 @@ export class StatefulProperty<T> extends ObservableProperty<T> {
 
 		// Restore the property value from storage.
 		this._initFromStorage();
-	}
-
-	// ----------------
-	// STATIC FUNCTIONS
-	// ----------------
-
-	/**
-	 * Property that can be awaited to guarantee that all `StatefulProperty`'s have been initialized from storage. Required to enable async data stores.
-	 * 
-	 * @returns Nothing.
-	 */
-	static get allSettled(): Promise<Map<string, any>> {
-
-		return new Promise((resolve, reject) => {
-
-			const keys = Object.keys(_pendingPromises);
-
-			// Wait for all of the pending storage read operations to finalize.
-			void Promise.allSettled(_pendingPromises.values()).then(outcome => {
-
-				// Report the value of each storage property read.
-				const result = new Map<string, unknown>();
-
-				for (let i = 0; i < outcome.length; i++) {
-
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
-					result.set(keys[i], outcome[i].value);
-				}
-
-				resolve(result);
-			});
-		});
 	}
 
 	// ----------------
@@ -140,13 +103,13 @@ export class StatefulProperty<T> extends ObservableProperty<T> {
 			// If the storage is async, then queue the value to be read, otherwise just set the storage value as the property's initial value.
 			if (isPromise(storageValue)) {
 
-				_pendingPromises.set(this._key, Promise.resolve(storageValue).then((value) => {
+				StateManager.enqueue(this._key, Promise.resolve(storageValue).then((value) => {
 
 					// Initialize the property with the value read from storage.
 					super.set(value as T);
 
 					// Clean up, by removing the operation from read the queue.
-					_pendingPromises.delete(this._key);
+					StateManager.dequeue(this._key);
 
 					return value;
 				}));

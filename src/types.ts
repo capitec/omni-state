@@ -15,4 +15,4 @@ export type PropertyChangeHandler<T> = (value: T) => void;
  * 
  * @returns Nothing.
  */
-export type PropertySetHandler<T> = (value: T) => void;
+export type PropertySetHandler<T> = (value: NonNullable<T>) => void;
