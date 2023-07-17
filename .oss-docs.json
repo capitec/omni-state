@@ -1,11 +1,4 @@
 {
 	"display": "Omni State",
-	"repo": "https://github.com/capitec/omni-state",
-	"links": [
-		{
-			"name": "NPM",
-			"icon": "https://avatars.githubusercontent.com/u/6078720",
-			"url": "https://www.npmjs.com/package/@capitec/omni-state"
-		}
-	]
+	"logo": "https://raw.githubusercontent.com/capitec/omni-state/develop/docs/logos/omni.png"
 }
