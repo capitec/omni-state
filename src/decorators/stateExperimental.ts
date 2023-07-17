@@ -14,7 +14,7 @@
  * adopting these as the ultimate specifications may change. This decorator thus only aims to
  * support the 3 most common versions of the spec currently in use as above.
  * 
- * Recently, typescript 5.0 was released with support for the Stage 3 decorators proposal, the will
+ * Recently, typescript 5.0 was released with support for the Stage 3 decorators proposal, this will
  * likely become the standard going forward, at which point we will release a new version of this
  * decorator without the 'experimental' moniker.
  * 
