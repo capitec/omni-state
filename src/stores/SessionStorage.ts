@@ -26,6 +26,8 @@ class SessionStorageImpl implements SyncStorage {
 
 		} catch (err) {
 
+			console.error(err);
+
 			return undefined;
 		}
 	}
@@ -40,7 +42,14 @@ class SessionStorageImpl implements SyncStorage {
 	 */
 	set(key: string, value: unknown): void {
 
-		window.sessionStorage.setItem(key, JSON.stringify(value));
+		try {
+
+			window.sessionStorage.setItem(key, JSON.stringify(value));
+
+		} catch (err) {
+
+			console.error(err);
+		}
 	}
 
 	/**
@@ -52,7 +61,14 @@ class SessionStorageImpl implements SyncStorage {
 	 */
 	remove(key: string): void {
 
-		window.sessionStorage.removeItem(key);
+		try {
+
+			window.sessionStorage.removeItem(key);
+
+		} catch (err) {
+
+			console.error(err);
+		}
 	}
 
 	/**
@@ -62,7 +78,14 @@ class SessionStorageImpl implements SyncStorage {
 	 */
 	clear(): void {
 
-		window.sessionStorage.clear();
+		try {
+
+			window.sessionStorage.clear();
+
+		} catch (err) {
+
+			console.error(err);
+		}
 	}
 
 	/**

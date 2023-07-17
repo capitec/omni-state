@@ -28,6 +28,8 @@ class LocalStorageImpl implements SyncStorage {
 
 		} catch (err) {
 
+			console.error(err);
+
 			return undefined;
 		}
 	}
@@ -42,7 +44,14 @@ class LocalStorageImpl implements SyncStorage {
 	 */
 	set(key: string, value: unknown): void {
 
-		window.localStorage.setItem(key, JSON.stringify(value));
+		try {
+
+			window.localStorage.setItem(key, JSON.stringify(value));
+
+		} catch (err) {
+
+			console.error(err);
+		}
 	}
 
 	/**
@@ -54,7 +63,14 @@ class LocalStorageImpl implements SyncStorage {
 	 */
 	remove(key: string): void {
 
-		window.localStorage.removeItem(key);
+		try {
+
+			window.localStorage.removeItem(key);
+
+		} catch (err) {
+
+			console.error(err);
+		}
 	}
 
 	/**
@@ -64,7 +80,14 @@ class LocalStorageImpl implements SyncStorage {
 	 */
 	clear(): void {
 
-		window.localStorage.clear();
+		try {
+
+			window.localStorage.clear();
+
+		} catch (err) {
+
+			console.error(err);
+		}
 	}
 
 	/**
