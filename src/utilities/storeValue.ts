@@ -1,5 +1,5 @@
-import { AsyncStorage } from '../types/AsyncStorage';
-import { SyncStorage } from '../types/SyncStorage';
+import { AsyncStorage } from '../types/AsyncStorage.js';
+import { SyncStorage } from '../types/SyncStorage.js';
 
 /**
  * Saves a value in storage, or remove it from storage if not set.

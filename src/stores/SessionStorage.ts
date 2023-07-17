@@ -1,4 +1,4 @@
-import { SyncStorage } from '../types/SyncStorage';
+import { SyncStorage } from '../types/SyncStorage.js';
 
 /**
  * Storage class that allows for persisting data as JSON values for the duration of a browser session.
