@@ -53,7 +53,7 @@ type SetterDescriptor = () => void;
  */
 function patchObservablePropertySet<T>(storage: SyncStorage | AsyncStorage, key: string, observable: ObservableProperty<T>): void {
 
-	// Prevent the ObservableProperty.set function from being patch if it is already patched.
+	// Prevent the ObservableProperty.set function from being patched if it is already is.
 
 	if (Reflect.has(observable, '_state_set_patched')) {
 		return;
