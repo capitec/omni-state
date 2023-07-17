@@ -224,7 +224,7 @@ export function stateExperimental({ storage, key }: {
 
 			} else if (propertyValue instanceof ObservableProperty) {
 
-				// If the property is a ObservableProperty type, then patch the ObservableProperty.set function to store the property value when the set function is called.
+				// If the property is an ObservableProperty type, then patch the ObservableProperty.set function to store the property value when the set function is called.
 				patchObservablePropertySet(storage, key, propertyValue);
 
 			} else {
