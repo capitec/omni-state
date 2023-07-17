@@ -8,7 +8,7 @@ if (window['structuredClone']) {
 /**
  * Makes a complete copy of a given serializable object, preventing any accidental modification by reference to the source object.
  *
- * @param _asd - The object to make a deep copy of.
+ * @param object - The object to make a deep copy of.
  * 
  * @returns The deep copy of the object.
  */
