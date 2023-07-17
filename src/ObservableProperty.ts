@@ -31,8 +31,6 @@ export class ObservableProperty<T> {
 
 	/**
 	 * Initializes the property.
-	 * 
-	 * @param args - The property arguments.
 	 */
 	constructor() {
 

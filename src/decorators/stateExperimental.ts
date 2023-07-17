@@ -206,7 +206,7 @@ export function stateExperimental({ storage, key }: {
 			}
 		}
 
-		// Create the new property descriptor template that patches state behavior onto the property.
+		// Create the new implementation that we'll patch over the default property behavior.
 		const get = function (): unknown {
 			return propertyValue;
 		};
@@ -234,6 +234,7 @@ export function stateExperimental({ storage, key }: {
 			}
 		};
 
+		// Patch the the existing property descriptor if it exists, or create a new property descriptor if it is not yet defined.
 		const descriptor = Object.getOwnPropertyDescriptor(target, propertyKey);
 
 		if (!descriptor) {
