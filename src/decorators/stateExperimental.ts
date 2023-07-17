@@ -156,14 +156,11 @@ export function stateExperimental({ storage, key }: {
 
 					if (isDefined(storageValue)) {
 
-						// Parse the value set in storage using the provided encoder.
-						const decodedValue = value as T;
-
-						// Set the decoded storage value as the initial property value.
+						// Set the storage value as the initial property value.
 						if (propertyValue instanceof ObservableProperty) {
-							propertyValue.set(decodedValue);
+							propertyValue.set(value);
 						} else {
-							propertyValue = decodedValue;
+							propertyValue = value;
 						}
 					}
 				}
@@ -189,14 +186,11 @@ export function stateExperimental({ storage, key }: {
 
 		} else {
 
-			// Parse the value set in storage using the provided encoder.
-			const decodedValue = storageValue;
-
-			// Set the decoded storage value as the initial property value.
+			// Set the storage value as the initial property value.
 			if (propertyValue instanceof ObservableProperty) {
-				propertyValue.set(decodedValue);
+				propertyValue.set(storageValue);
 			} else {
-				propertyValue = decodedValue as T | undefined;
+				propertyValue = storageValue as T | undefined;
 			}
 
 			// Patch the property to save value changes into storage.

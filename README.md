@@ -2,7 +2,7 @@
 
 <h3 align="center">Omni State</h3>
 <p align="center"><strong><code>@capitec/omni-state</code></strong></p>
-<p align="center">Simple patterns to manage your web app state and storage</p>
+<p align="center">Simple web app state and storage management</p>
 
 <br />
 
@@ -21,8 +21,6 @@
 <p align="center">
 	[<a href="#introduction">Introduction</a>]
 	[<a href="#usage">Usage</a>]
-	[<a href="#examples">Examples</a>]
-	[<a href="#api-reference">API Reference</a>]
 	[<a href="#contributors">Contributors</a>]
 	[<a href="#license">License</a>]
 </p>
@@ -35,201 +33,343 @@
 
 ## Introduction
 
-Omni State is a collection of utilities that makes it simple to manage the local state and data storage in web applications. The library is lightweight and comes with zero dependencies, minimizing bloat to your project.
+Omni State is a collection of utilities that makes it simple to manage the local state and data storage in web applications. The library is lightweight and comes with zero runtime dependencies, minimizing bloat to your project.
 
 Core features of the library include:
-- **TODO** - TODO.
-- **TODO** - TODO.
-- **TODO** - TODO.
-
-Features:
-- Observable property
-- Stateful property
-- Storage decorator
-- Async storage support
-- Support strongly typed runtime data models
-- Immutable state, edit draft before persisting
+- **ObservableProperty** - Provides an observable property that enables immutable editing of state using a draft before persisting model.
+- **StatefulProperty** - An extension of the ObservableProperty that persists the state data to a provided store when set, e.g. local storage, session storage, or a custom store.
+- **Storage decorator** - A decorator that allows you to annotate any class property to persist its value to storage when set.
+- **Local & Session Data Stores** - Default implementation are provided to persist data to the browse local storage and session storage.
+- **Custom Data Stores** - Custom data stores can be created by implementing either the SyncStorage or AsyncStorage interfaces, enabling you to e.g. persist data online when a property is set.
 
 <br>
 
 ## Usage
 
-Install the library:
+1️⃣ &nbsp; Install the library in your project.
 
 ```bash
 npm install @capitec/omni-state
 ```
 
-Then, simply make use of any of the below patterns inside of your app's global state class to create individual properties for your app state.
+2️⃣ &nbsp; Use any of the example property patterns below where you implement state management in your app. Here we provide an example using global singleton to manage the state of an app.
 
-```js
-// e.g. my-app/AppState.js
+```ts
+// e.g. my-app/AppState.ts
 
-import { ObservableProperty, StatefulProperty, state } from '@capitec/omni-state';
-import { UserSession } from './models/UserSession';
-import { KeyStore } from './stores/KeyStore';
+import { LocalStorage, ObservableProperty, SessionStorage, StatefulProperty, stateExperimental } from '@capitec/omni-state';
+import { MyCustomStore } from './stores/MyCustomStore';
 
-class AppState {
+export type Person = {
+    firstName: string;
+    lastName: string;
+}
 
-    // State decorator on standard object, targeting a synchronous store.
-    @state({ storage: localStorage, key: 'CapacitorStorage.userSession' })
-    userSession;
+export class AppState {
 
-    // State decorator on standard object, targeting an asynchronous store.
-    @state({ storage: LocalStorage, key: 'userSession', encoder: null })
-    userSession;
+    // OBSERVABLE PROPERTY
 
-    // State decorator on an observable property, targeting a synchronous store.
-    @state({ storage: localStorage, key: 'CapacitorStorage.userSession' })
-    userSession = new ObservableProperty({ model: UserSession });
+    // A simple in-memory property that can be observed for changes, e.g.:
+    simpleObservable = new ObservableProperty<Person>();
 
-    // State decorator on an observable property, targeting an asynchronous store.
-    @state({
-		storage: LocalStorage,
-		key: 'userSession',
-		encoder: null
-	})
-    userSession = new ObservableProperty({ model: UserSession });
+    // STATEFUL PROPERTY
 
-    // Stateful property, targeting a synchronous store.
-    userSession = new StatefulProperty({
-		storage: localStorage,
-		key: 'CapacitorStorage.userSession',
-		model: UserSession
-	});
+    // An observable property that is persisted to SessionStorage when set, e.g.:
+    statefulSessionObservable = new StatefulProperty({ storage: SessionStorage, key: 'statefulSessionObservable' });
 
-    // Stateful property, targeting an asynchronous store.
-    userSession = new StatefulProperty({
-		storage: LocalStorage,
-		key: 'userSession',
-		encoder: null,
-		model: UserSession
-	});
+    // An observable property that is persisted to LocalStorage when set, e.g.:
+    statefulLocalObservable = new StatefulProperty({ storage: LocalStorage, key: 'statefulLocalObservable' });
 
+    // An observable property that is persisted to a custom async store when set, e.g.:
+    statefulCustomObservable = new StatefulProperty({ storage: MyCustomStore, key: 'statefulCustomObservable' });
+
+    // STATE DECORATOR - using Typescript "experimentalDecorators": true
+
+    // A simple property that is persisted to SessionStorage when set, e.g.:
+    @stateExperimental({ storage: SessionStorage, key: 'decoratorSession' })
+    decoratorSession?: string;
+
+    // A simple property that is persisted to LocalStorage when set, e.g.:
+    @stateExperimental({ storage: LocalStorage, key: 'decoratorSession' })
+    decoratorLocal?: string;
+
+    // A simple property that is persisted to a custom async store when set, e.g.:
+    @stateExperimental({ storage: MyCustomStore, key: 'decoratorCustom' })
+    decoratorCustom?: string;
+
+    // OBSERVABLE PROPERTY + STATE DECORATOR = STATEFUL PROPERTY
+
+    // A simple property that is persisted to SessionStorage when set, e.g.:
+    @stateExperimental({ storage: SessionStorage, key: 'observableSession' })
+    observableSession = new ObservableProperty<string>();
+
+    // A simple property that is persisted to LocalStorage when set, e.g.:
+    @stateExperimental({ storage: LocalStorage, key: 'observableLocal' })
+    observableLocal = new ObservableProperty<string>();
+
+    // A simple property that is persisted to a custom async store when set, e.g.:
+    @stateExperimental({ storage: MyCustomStore, key: 'observableCustom' })
+    observableCustom = new ObservableProperty<string>();
+
+    /**
+     * Get an instance of the shared state.
+     * 
+     * @returns The shared state instance.
+     */
     static getInstance() {
 
-        return this.instance || (this.instance = new SharedState());
+        if (!AppState.instance) {
+            AppState.instance = new SharedState();
+        }
+
+        return AppState.instance;
     }
 
+    /**
+     * Initialize App global state, read persisted settings.
+     * 
+     * Note: Only to be called once by the app entrypoint.
+     * 
+     * @returns Nothing.
+     */
     async init() {
 
         // Ensure all state properties have been initialized from storage.
-        await state.allSettled;
+        await StateManager.allSettled;
     }
 }
-
-export {
-    AppState as default,
-    AppState
-}
-
 ```
 
-In your app, make use of any of the below patterns to access and mutate the app state properties.
+3️⃣ &nbsp; Make use of any of the below patterns to access and mutate the app state properties. Note both ObservableProperty and StatefulProperty implement the observable pattern, allowing you to .get(), .set(), and .subscribe() to the property. Decorated properties are implemented as standard properties, thus they can be get and set like any other primitive or object.
 
-```js
-// my-app/App.js
+```ts
+// my-app/App.ts
 
 import { AppState } from './AppState';
 
 class App {
 
+    private appState: AppState;
+
     constructor() {
 
-        const appState = AppState.getInstance();
+        this.appState = AppState.getInstance();
+    }
 
-        appState.userSession.set(draft => {
+    async init(): void {
 
-            draft.firstName = 'Hello';
-            draft.lastName = 'World';
+        // Ensure all app state values are loaded from storage.
+        await appState.init();
+
+        // USING OBSERVABLE OR STATEFUL PROPERTIES
+
+        // Initializing an observable (or stateful) property.
+        appState.simpleObservable.set({
+            firstName: 'Hello',
+            lastName: 'World';
         });
+
+        // Subscribing to value changes on an observable (or stateful) property.
+        appState.simpleObservable.subscribe(value => {
+            console.log(value);
+        });
+
+        // Editing specific values on an observable (or stateful) property.
+        appState.simpleObservable.set(draft => {
+            draft.firstName = 'Test';
+        });
+
+        // USING STATE DECORATOR PROPERTIES
+
+        // Setting a decorated property.
+        this.decoratorLocal = 'Test';
+
+        // Getting a decorated property
+        console.log(this.decoratorLocal);
     }
 }
+
+await new App().init();
 ```
 
-<br>
+4️⃣ &nbsp; Omni State exposes implementations for [LocalStorage](./src/stores/LocalStorage.ts) and [SessionStorage](./src/stores/SessionStorage.ts) stores. However, you can implement a custom store by creating an implementation of either the [SyncStorage](./src/types/SyncStorage.ts) or [AsyncStorage](./src/types/AsyncStorage.ts) interfaces.
 
-## Examples
+The SyncStorage interface is used to implement the LocalStorage and SessionStorage stores, while the AsyncStorage interface allows you to build a custom storage implementation that can persist data to environments that have to be contacted asynchronously, e.g. saving values to an online service.
 
-Starter projects are available in the [examples directory](./examples) for the following decorator standards:
+```ts
+// my-app/stores/MyCustomStore.ts
 
-<div align="center">
-	<table>
-		<tbody>
-			<tr>
-				<td align="center">
-					<a href="./examples/vanilla">
-						<img src="./docs/logos/typescript.png" width="128" height="128" alt="Vanilla JS" />
-						<br />
-						<p><b>TypeScript</b><br><sub>Experimental Decorators</sub</p>
-					</a>
-				</td>
-				<td align="center">
-					<a href="./examples/lit">
-						<img src="./docs/logos/babel.png" width="128" height="128" alt="Lit" />
-						<br />
-						<p><b>Babel</b><br><sub>Lecacy Decorators</sub</p>
-					</a>
-				</td>
-				<td align="center">
-					<a href="./examples/angular">
-						<img src="./docs/logos/babel.png" width="128" height="128" alt="Lit" />
-						<br />
-						<p><b>Babel</b><br><sub>Standard (2018-09)</sub</p>
-					</a>
-				</td>
-			</tr>
-		</tbody>
-	</table>
-</div>
+import { SyncStorage } from '@capitec/omni-state';
 
-<br>
+/**
+ * Simple wrapper around the browser `localStorage` that simplifies storing values across browser sessions.
+ * 
+ * Values are persisted to storage as JSON strings, and can be read back as typed objects.
+ */
+class MyCustomStoreImpl implements SyncStorage {
 
-## API Reference
+    /**
+     * Gets a value from storage for the given key.
+     * 
+     * @param key - The key under which the value is stored.
+     * 
+     * @returns The stored value parsed from JSON, or null if not set.
+     */
+    get<T>(key: string): T | undefined {
 
-### ObservableProperty
+        try {
 
-todo
+            const result = window.localStorage.getItem(key);
 
-### StatefulProperty
+            console.log(`Reading Key: ${key}`, result);
 
-todo
+            if (!result) {
+                return undefined;
+            }
 
-### ModelBase
+            return JSON.parse(result) as T;
 
-todo
+        } catch (err) {
 
-### decorators/state
+            return undefined;
+        }
+    }
 
-todo
+    /** 
+     * Sets a value in storage for the given key.
+     * 
+     * @param key - The key under which to store the value.
+     * @param value - The value to store.
+     * 
+     * @returns Nothing.
+     */
+    set(key: string, value: unknown): void {
 
-### utilities/deepCopy
+        console.log(`Writing Key: ${key}`, value);
 
-todo
+        window.localStorage.setItem(key, JSON.stringify(value));
+    }
 
-### utilities/deepFreeze
+    /**
+     * Removes a value from storage for the given key.
+     * 
+     * @param key - The key of the value to remove.
+     * 
+     * @returns Nothing.
+     */
+    remove(key: string): void {
 
-todo
+        console.log(`Removing Key: ${key}`);
 
-### utilities/isDefined
+        window.localStorage.removeItem(key);
+    }
 
-todo
+    /**
+     * Removes all values from storage.
+     * 
+     * @returns Nothing.
+     */
+    clear(): void {
 
-### utilities/isFunction
+        console.log(`Clearing all keys`);
 
-todo
+        window.localStorage.clear();
+    }
 
-### utilities/isPromise
+    /**
+     * Get the name of the key at a given index.
+     * 
+     * @param index - The index number to get the key name for.
+     * 
+     * @returns The name of the key at the index.
+     */
+    key(index: number): string | undefined {
 
-todo
+        return window.localStorage.key(index) || undefined;
+    }
 
-### utilities/parseToModel
+    /**
+     * Finds a list of all keys in storage.
+     * 
+     * @returns The list of keys in storage.
+     */
+    keys(): string[] {
 
-todo
+        return Object.keys(window.localStorage);
+    }
 
-### utilities/storeValue
+    /**
+     * Get the number of items in storage.
+     * 
+     * @returns The storage item count.
+     */
+    size(): number {
 
-todo
+        return window.localStorage.length;
+    }
+}
+
+export const MyCustomStore = new MyCustomStoreImpl();
+```
+
+5️⃣ &nbsp; To make use of the experimental decorators, ensure your environment configurations includes the following:
+
+### TypeScript
+
+If using TypeScript, include this in your ```tsconfig.json```:
+```json
+{
+    "experimentalDecorators": true
+}
+```
+### Babel
+
+If using Babel, include this in your ```.babelrc```:
+```json
+{
+    "plugins": [
+        [
+            "@babel/plugin-proposal-decorators",
+            {
+                "version": "2018-09",
+                "decoratorsBeforeExport": true
+            }
+        ]
+    ]
+}
+```
+### Webpack
+
+If using Webpack, include this in your ```webpack.build.js```:
+```js
+export default {
+    module: {
+        rules: [
+            {
+                test: /\.(js|mjs|jsx|ts|tsx)$/,
+                exclude: /node_modules[\\/](?!(omni-components|omni-router|omni-state)[\\/]).*/,
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            presets: ['@babel/preset-env'],
+                            plugins: [
+                                ['@babel/transform-runtime'],
+                                [
+                                    '@babel/plugin-proposal-decorators', {
+                                        version: '2018-09',
+                                        decoratorsBeforeExport: true
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+};
+```
 
 <br>
 

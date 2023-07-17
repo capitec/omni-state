@@ -1,7 +1,7 @@
 {
 	"name": "@capitec/omni-state",
-	"version": "0.0.5",
-	"description": "Simple patterns to manage your web app state and storage",
+	"version": "0.1.0",
+	"description": "Simple web app state and storage management",
 	"author": "Capitec",
 	"license": "MIT",
 	"homepage": "https://github.com/capitec/omni-state",
