@@ -101,7 +101,7 @@ function patchObservablePropertySet<T>(storage: SyncStorage | AsyncStorage, key:
 // ------------------------
 
 /**
- * Property decorator saves the value of a property into storage whenever the property value changes.
+ * Property decorator that saves the value of a property into storage whenever the property value changes.
  * 
  * Support is provided for both synchronous and asynchronous storage mechanisms, including:
  *   1) LocalStorage
