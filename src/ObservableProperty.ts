@@ -2,7 +2,7 @@ import type { PropertyChangeHandler, PropertySetHandler } from './types';
 
 import { isDefined } from './utilities/isDefined.js';
 import { isFunction } from './utilities/isFunction.js';
-import { deepCopy } from './utilities/deepCopy';
+import { deepCopy } from './utilities/deepCopy.js';
 
 /**
  * Property wrapper that can be observed for changes.
