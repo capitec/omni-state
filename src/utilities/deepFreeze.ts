@@ -10,7 +10,7 @@ export function deepFreeze(object: object): object {
 	// Implementation based on the MDN Object.freeze documentation, available here:
 	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze
 
-	// Just return the value if it is a primitive, i.e. not and object type.
+	// Just return the value if it is a primitive, i.e. not an object type.
 	if (typeof object !== 'object' || object === null || object === undefined) {
 
 		return object;
