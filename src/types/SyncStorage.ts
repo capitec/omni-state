@@ -8,7 +8,7 @@ export interface SyncStorage {
 	 * 
 	 * @param key - The key under which the value is stored.
 	 * 
-	 * @returns The stored value parsed from JSON, or null if not set.
+	 * @returns The stored value parsed from JSON, or undefined if not set.
 	 */
 	get<T>(key: string): T | undefined;
 
