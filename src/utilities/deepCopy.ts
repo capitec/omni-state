@@ -18,7 +18,7 @@ export function deepCopy(object: any): any { // eslint-disable-line @typescript-
 	// 1) web.dev article - https://web.dev/structured-clone/
 	// 2) performance benchmark - https://surma.dev/things/deep-copy/index.html
 
-	// Just return the value if it is a primitive, i.e. not and object type.
+	// Just return the value if it is a primitive, i.e. not an object type.
 	if (typeof object !== 'object' || object === null || object === undefined) {
 		return object;
 	}
