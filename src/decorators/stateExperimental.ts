@@ -16,7 +16,7 @@
  * 
  * Recently, typescript 5.0 was released with support for the Stage 3 decorators proposal, this will
  * likely become the standard going forward, at which point we will release a new version of this
- * decorator without the 'experimental' moniker.
+ * decorator without the 'experimental' flag.
  * 
  * More info here:
  *   - TC39 Status = https://github.com/tc39/proposal-decorators
