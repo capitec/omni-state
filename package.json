@@ -1,6 +1,6 @@
 {
 	"name": "@capitec/omni-state",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "Simple web app state and storage management",
 	"author": "Capitec",
 	"license": "MIT",
@@ -20,14 +20,14 @@
 	},
 	"files": [
 		"dist",
-		"!dist/*.tests.*",
-		"!dist/*.test.*",
-		"!dist/*.spec.*",
-		"src/*.ts",
-		"src/*.js",
-		"!src/*.spec.*",
-		"!src/*.tests.*",
-		"!src/*.test.*"
+		"!dist/**/*.tests.*",
+		"!dist/**/*.test.*",
+		"!dist/**/*.spec.*",
+		"src/**/*.ts",
+		"src/**/*.js",
+		"!src/**/*.spec.*",
+		"!src/**/*.tests.*",
+		"!src/**/*.test.*"
 	],
 	"scripts": {
 		"build": "tsc",
