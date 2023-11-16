@@ -2,8 +2,8 @@
 export { stateExperimental } from './decorators/stateExperimental.js';
 
 // Stores
-export type { LocalStorage } from './stores/LocalStorage.js';
-export type { SessionStorage } from './stores/SessionStorage.js';
+export { LocalStorage } from './stores/LocalStorage.js';
+export { SessionStorage } from './stores/SessionStorage.js';
 
 // Types
 export type { AsyncStorage } from './types/AsyncStorage.js';
